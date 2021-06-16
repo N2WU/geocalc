@@ -79,8 +79,8 @@ def LocationToPoint(location): #location is [lat, lon, elv]
 
         # We used geocentric latitude to calculate (x,y,z) on the Earth's ellipsoid.
         # Now we use geodetic latitude to calculate normal vector from the surface, to correct for elevation.
-  cosGlat = Math.cos(lat)
-  sinGlat = Math.sin(lat)
+  cosGlat = math.cos(lat)
+  sinGlat = math.sin(lat)
 
   nx = cosGlat * cosLon
   ny = cosGlat * sinLon
