@@ -86,15 +86,15 @@ def LocationToPoint(location): #location is [lat, lon, elv]
   ny = cosGlat * sinLon
   nz = sinGlat
 
-  x += location[2] * nx
-  y += location[2] * ny
-  z += location[2] * nz
+  x = x + location[2] * nx
+  y = y + location[2] * ny
+  z = z + location[2] * nz
 
   xyz = [x, y, z]
   nxyz = [nx, ny, nz]
   return [xyz, radius, nxyz]
 
-def Distance(ap, bp): #figure out what this meajs
+def Distance(ap, bp): #figure out what this means
   dx = ap[0]- bp[0]
   dy = ap[1] - bp[1]
   dz = ap[2] - bp[2]
@@ -172,6 +172,7 @@ if (b != null):
     save_b_elv = ''    # holds point B elevation from non-geostationary mode
 print("Altitude is: ", altitude)
 print("Azimuth is: ", azimuth)
+print("Distace is: ", distKm)
 
 '''
 def OnGeoCheck()
