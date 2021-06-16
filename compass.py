@@ -13,7 +13,7 @@ import math
 limit = 90
 def ParseAngle(id, limit):
   angle = float(id)
-  if (isNaN(angle) || (angle < -limit) || (angle > limit)): ## check if this is valid
+  if (math.isnan(angle) == True) or (angle < -limit) or (angle > limit): ## check if this is valid
     printf("Invalid angle value.")
       return null
   else:
