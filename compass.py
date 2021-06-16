@@ -1,10 +1,10 @@
 
 #Azimuth/Distance calculator - by Don Cross</h1>
-'''
+"""
     Given the latitude, longitude, and elevation of two points on the Earth,
     this calculator determines the azimuth (compass direction) and distance
     of the second point (B) as seen from the first point (A).
-'''
+"""
 a = [41.3535187, -74.02831, 30]# input('Please enter ground station coordinates in format [lat,lon,el]') #[lat, lon]
 b = input('please enter target coordinates in format [lat,lon,el].') #change to parse from APRS website
 
