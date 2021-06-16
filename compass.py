@@ -5,11 +5,12 @@
     this calculator determines the azimuth (compass direction) and distance
     of the second point (B) as seen from the first point (A).
 '''
-a = input('Please enter ground station coordinates.')
-b = input('please enter target coordinates.') #change to parse from APRS website
+a = input('Please enter ground station coordinates in format [lat,lon,el]') #[lat, lon]
+b = input('please enter target coordinates in format [lat,lon,el].') #change to parse from APRS website
 
 import math
 
+limit = 90
 def ParseAngle(id, limit):
   angle = float(id)
   if (isNaN(angle) || (angle < -limit) || (angle > limit)): ## check if this is valid
@@ -94,9 +95,9 @@ def LocationToPoint(location): #location is [lat, lon, elv]
   return [xyz, radius, nxyz]
 
 def Distance(ap, bp): #figure out what this meajs
-  dx = ap.x - bp.x
-  dy = ap.y - bp.y
-  dz = ap.z - bp.z
+  dx = ap[0]- bp[0]
+  dy = ap[1] - bp[1]
+  dz = ap[2] - bp[2]
   return math.sqrt(dx*dx + dy*dy + dz*dz) #some sort of radius
 
 def RotateGlobe(b, a, bradius, aradius):
@@ -133,15 +134,15 @@ def NormalizeVectorDiff(b, a):
   dist = math.sqrt(dist2)
   return [(dx/dist), (dy/dist), (dz/dist), 1.0]
 
- def Calculate():
 
-  a = ParseLocation(a)
-  if (a != null):
-    b = ParseLocation(b)
-    if (b != null):
-      ap = LocationToPoint(a)
-      bp = LocationToPoint(b)
-      distKm = 0.001 * Distance(ap,bp)
+
+#a = ParseLocation(a) #not sure what this does
+if (a != null):
+#b = ParseLocation(b) #not sure what this does - within limits?
+if (b != null):
+  ap = LocationToPoint(a) #now it's [x, y, z, radius, nx, ny, nz]
+  bp = LocationToPoint(b)
+  distKm = 0.001 * Distance(ap,bp)
                 #$('div_Distance').innerHTML = distKm.toFixed(3) + '&nbsp;km';
 
                 # Let's use a trick to calculate azimuth:
@@ -150,15 +151,14 @@ def NormalizeVectorDiff(b, a):
                 # but use angles based on subtraction.
                 # Point A will be at x=radius, y=0, z=0.
                 # Vector difference B-A will have dz = N/S component, dy = E/W component.
-      br = RotateGlobe(b, a, bp[2], ap[2]) #radius is 3rd element
-      if (br[2]*br[2] + br[1]*br[1] > 1.0e-6): #fix
-        theta = Math.atan2(br.z, br.y) * 180.0 / math.pi
-        azimuth = 90.0 - theta
-        if (azimuth < 0.0):
-           azimuth = azimuth + 360.0
+  br = RotateGlobe(b, a, bp[3], ap[3]) #radius is 4th element
+  if (br[2]*br[2] + br[1]*br[1] > 1.0e-6): #fix
+    theta = Math.atan2(br.z, br.y) * 180.0 / math.pi
+    azimuth = 90.0 - theta
+    if (azimuth < 0.0):
+        azimuth = azimuth + 360.0
         if (azimuth > 360.0):
            azimuth = azimuth - 360.0
-
            bma = NormalizeVectorDiff(bp, ap)
         if (bma != null):
             # Calculate altitude, which is the angle above the horizon of B as seen from A.
@@ -168,6 +168,8 @@ def NormalizeVectorDiff(b, a):
           altitude = 90.0 - (180.0 / math.pi)*math.acos(bma.x*ap.nx + bma.y*ap.ny + bma.z*ap.nz); #fix
     save_b_lat = ''    # holds point B latitude  from non-geostationary mode
     save_b_elv = ''    # holds point B elevation from non-geostationary mode
+
+
 '''
 def OnGeoCheck()
         # The geostationary checkbox was clicked.
