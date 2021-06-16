@@ -100,10 +100,10 @@ def Distance(ap, bp): #figure out what this meajs
   dz = ap[2] - bp[2]
   return math.sqrt(dx*dx + dy*dy + dz*dz) #some sort of radius
 
-def RotateGlobe(b, a, bradius, aradius):
+def RotateGlobe(b, a, bradius, aradius): #[blat, blon, bel] [alat, alon, ael], [bradius], [aradius]
         # Get modified coordinates of 'b' by rotating the globe so that 'a' is at lat=0, lon=0.
-  br = {lat:b.lat, lon:(b.lon - a.lon), elv:b.elv}; #change this
-  brp = LocationToPoint(br)
+  br = [b[0], (b[1]-a[1]), b[2]]; #change this
+  brp = LocationToPoint(br) #returns [x y z radius nx ny nz]
 
         # Rotate brp cartesian coordinates around the z-axis by a.lon degrees,
         # then around the y-axis by a.lat degrees.
@@ -113,26 +113,28 @@ def RotateGlobe(b, a, bradius, aradius):
         # So we will look the other way making the x-axis pointing right, the z-axis
         # pointing up, and the rotation treated as negative.
 
-  alat = GeocentricLatitude(-a.lat * math.pi / 180.0)
+  alat = GeocentricLatitude(-a[0] * math.pi / 180.0)
   acos = math.cos(alat)
   asin = math.sin(alat)
 
-  bx = (brp.x * acos) - (brp.z * asin)
-  by = brp.y
-  bz = (brp.x * asin) + (brp.z * acos)
+  bx = (brp[0] * acos) - (brp[2] * asin)
+  by = brp[1]
+  bz = (brp[0] * asin) + (brp[2] * acos)
 
   return [bx, by, bz, bradius]
 
-def NormalizeVectorDiff(b, a):
-        # Calculate norm(b-a), where norm divides a vector by its length to produce a unit vector.
-  dx = b.x - a.x
-  dy = b.y - a.y
-  dz = b.z - a.z
+def NormalizeVectorDiff(bp, ap):
+        # Calculate norm(b-a), where norm divides a vector by its length to produce a unit vector. 
+        # except, we have lat and lon coordinates, not xyz
+        ##now it's [x, y, z, radius, nx, ny, nz]
+  dx = bp[0] - ap[0]
+  dy = bp[1] - ap[1]
+  dz = bp[2] - ap[2]
   dist2 = dx*dx + dy*dy + dz*dz
   if (dist2 == 0):
     return null
   dist = math.sqrt(dist2)
-  return [(dx/dist), (dy/dist), (dz/dist), 1.0]
+  return [(dx/dist), (dy/dist), (dz/dist), 1.0] #[x y z radius]
 
 
 
@@ -151,24 +153,25 @@ if (b != null):
                 # but use angles based on subtraction.
                 # Point A will be at x=radius, y=0, z=0.
                 # Vector difference B-A will have dz = N/S component, dy = E/W component.
-  br = RotateGlobe(b, a, bp[3], ap[3]) #radius is 4th element
+  br = RotateGlobe(b, a, bp[3], ap[3]) #radius is 4th element, gives [bx by bz bradius]
   if (br[2]*br[2] + br[1]*br[1] > 1.0e-6): #fix
-    theta = Math.atan2(br.z, br.y) * 180.0 / math.pi
+    theta = math.atan2(br[2], br[1]) * 180.0 / math.pi
     azimuth = 90.0 - theta
     if (azimuth < 0.0):
         azimuth = azimuth + 360.0
         if (azimuth > 360.0):
            azimuth = azimuth - 360.0
-           bma = NormalizeVectorDiff(bp, ap)
+           bma = NormalizeVectorDiff(bp, ap) #gives [x y z radius]
         if (bma != null):
             # Calculate altitude, which is the angle above the horizon of B as seen from A.
             # Almost always, B will actually be below the horizon, so the altitude will be negative.
             # The dot product of bma and norm = cos(zenith_angle), and zenith_angle = (90 deg) - altitude.
             # So altitude = 90 - acos(dotprod).
-          altitude = 90.0 - (180.0 / math.pi)*math.acos(bma.x*ap.nx + bma.y*ap.ny + bma.z*ap.nz); #fix
+          altitude = 90.0 - (180.0 / math.pi)*math.acos(bma[0]*ap[4] + bma[1]*ap[5] + bma[2]*ap[6]); #fix
     save_b_lat = ''    # holds point B latitude  from non-geostationary mode
     save_b_elv = ''    # holds point B elevation from non-geostationary mode
-
+print("Altitude is: ", altitude)
+print("Azimuth is: ", azimuth)
 
 '''
 def OnGeoCheck()
