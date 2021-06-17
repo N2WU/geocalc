@@ -213,7 +213,7 @@ def Offset():
 	return aggregate
 
 def getPositionData(gps):
-	#https://drive.google.com/file/d/1TODVFoy82rdhfwawN9vUhAGCsYRyk-7V/view
+	#https://maker.pro/raspberry-pi/tutorial/how-to-read-gps-data-with-python-on-a-raspberry-pi
 	nx = gpsd.next()
 	# For a list of all supported classes and fields refer to:
 	# https://gpsd.gitlab.io/gpsd/gpsd_json.html
