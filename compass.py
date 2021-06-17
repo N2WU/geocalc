@@ -5,10 +5,43 @@
     this calculator determines the azimuth (compass direction) and distance
     of the second point (B) as seen from the first point (A).
 """
+
+"""
+function display_APRS() {
+	$json_url = "http://api.aprs.fi/api/get?apikey=0000&name=KBNA,KF4KFQ,AG4FW,WR1Q&what=wx&format=json";
+	$json = file_get_contents( $json_url, 0, null, null );
+	$json_output = json_decode( $json, true);
+	$station_array = $json_output[ 'entries' ];
+	foreach ( $station_array as $station ) {
+		$name = $station[ 'name' ];
+		$temp = $station[ 'temp' ];
+		$temp = ( ( 9 / 5 ) * $temp ) + 32; // Convert celsius to fahrenheit.
+		echo "Temperature is ".$temp."°F at ".$name."\n";
+	}
+	echo "\n\n";
+}
+
+display_APRS();
+"""
+
+"""
+def display_APRS()
+	json_url = "http://api.aprs.fi/api/get?apikey=0000&name=KBNA,KF4KFQ,AG4FW,WR1Q&what=wx&format=json"
+	#json = file_get_contents(url, 0, null, null)
+	json_outut = json.JSONDecoder(json, True)
+	station_array = json_output["entries"]
+	for station in range(1, len(station_array)):
+		name = station["name"]
+		temp = station["temp"]
+		temp = ((9/5) * temp) + 32 #convert C to F
+"""	
+		
+
 a = [41.3535187, -74.02831, 30]# input('Please enter ground station coordinates in format [lat,lon,el]') #[lat, lon]
 b = [41.747532, -74.086891, 10000] #change to parse from APRS website [41.747532, -74.086891, 10000]
 
 import math
+import json
 
 limit = 90
 """
