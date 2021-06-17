@@ -58,10 +58,6 @@ def display_APRS(callsign):
 		print(elv)
 		info = [lat, lng, elv]
 
-
-
-
-
 limit = 90
 
 def EarthRadiusInMeters(latitudeRadians):
@@ -202,10 +198,18 @@ def FixAzimuth(old_azimuth):
 	#Assumes no x- or y-axis rotation (gyro stays flat entire time and starts pointing magnetic north) IDENTIFY IF GRID OR MAGNETIC
 	#so really we need wz
 	angular_accel = wz #units is degrees per second, so how do we find total degree change? integrate / multiply by time
-	stop = time.perf_counter()
-	dt = stop - start 
-	rotation = angular_accel * dt #deviation is from north, counter-clockwise
-	new_azimuth = rotation + old_azimuth
+	time_tot = 10 #number of seconds, total, that you should sample for
+	aggregate = 0
+	for i in range(1000)
+		start = time.perf_counter()
+		ax,ay,az,wx,wy,wz = mpu6050_conv()
+		inst_w = wz
+		time.sleep(time_tot/1000) #ten-second sample
+		stop = time.perf_counter()
+		dt = stop - start
+		rotation = inst_w * dt #deviation is from north, counter-clockwise
+		aggregate = aggregate + rotation
+	azimuth = aggregate + old_azimuth
 	if (azimuth < 0.0):
 		azimuth = azimuth + 360.0
 	if (azimuth > 360.0):
