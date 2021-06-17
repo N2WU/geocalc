@@ -237,7 +237,7 @@ while True==True:
 	# pull in Rpi coordinates here
 	# input('Please enter ground station coordinates in format [lat,lon,el]') #[lat, lon]
 	b = display_APRS(callsign) #parsed from APRS website, default elv = 0
-	locations = [a[0], a[1],  a[2], b[1], b[2], b[3]]
+	locations = [a[0], a[1],  a[2], b[0], b[1], b[2]]
 	outputs = Calculate(locations)
 	
 	altitude = outputs[0]
