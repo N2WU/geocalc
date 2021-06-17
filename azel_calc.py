@@ -12,10 +12,13 @@
 import json
 import math
 import time
+from mpu9250_i2c import * #from the local file and https://makersportal.com/blog/2019/11/11/raspberry-pi-python-accelerometer-gyroscope-magnetometer
 
 # some packages were renamed in Python 3
 import urllib.request as urllib2
 import http.cookiejar as cookielib
+
+time.sleep(1)
 
 def file_get_contents(url):
 	url = str(url).replace(" ", "+") # just in case, no space in url
@@ -194,6 +197,21 @@ def Calculate(locations):
 		altitude = 90.0 - (180.0 / math.pi)*math.acos(bma[0]*ap[4] + bma[1]*ap[5] + bma[2]*ap[6]) #fix
 	return [altitude, azimuth, distKm]
 
+def FixAzimuth(old_azimuth):
+	ax,ay,az,wx,wy,wz = mpu6050_conv() # read and convert mpu6050 data, you need wx, wy, wz. 
+	#Assumes no x- or y-axis rotation (gyro stays flat entire time and starts pointing magnetic north) IDENTIFY IF GRID OR MAGNETIC
+	#so really we need wz
+	angular_accel = wz #units is degrees per second, so how do we find total degree change? integrate / multiply by time
+	stop = time.perf_counter()
+	dt = stop - start 
+	rotation = angular_accel * dt #deviation is from north, counter-clockwise
+	new_azimuth = rotation + old_azimuth
+	if (azimuth < 0.0):
+		azimuth = azimuth + 360.0
+	if (azimuth > 360.0):
+		azimuth = azimuth - 360.0
+	return azimuth
+	
 callsign = input("Please enter the callsign to track.")
 while True==True:
 	
@@ -205,12 +223,15 @@ while True==True:
 	outputs = Calculate(locations)
 	
 	altitude = outputs[0]
-	azimuth = ouputs[1]
+	
+	old_azimuth = ouputs[1]
+	new_azimuth = FixAzimuth(old_azimuth)
+	
 	distKm = outputs[2]
 	print("Altitude is: ", altitude)
-	print("Azimuth is: ", azimuth)
+	print("Azimuth is: ", new_azimuth)
 	print("Distace is: ", distKm)
-	time.sleep(10) #can the api handle requests every 10 seconds?
+	#time.sleep(10) #can the api handle requests every 10 seconds?
 	#port this over to antenna rotator commands
 
 
