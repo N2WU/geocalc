@@ -19,6 +19,7 @@ import urllib.request as urllib2
 import http.cookiejar as cookielib
 
 time.sleep(1)
+gpsd = gps(mode=WATCH_ENABLE|WATCH_NEWSTYLE)
 
 def file_get_contents(url):
 	url = str(url).replace(" ", "+") # just in case, no space in url
@@ -210,11 +211,29 @@ def Offset():
 		rotation = inst_w * dt #deviation is from north, counter-clockwise
 		aggregate = aggregate + rotation
 	return aggregate
+
+def getPositionData(gps):
+	#https://drive.google.com/file/d/1TODVFoy82rdhfwawN9vUhAGCsYRyk-7V/view
+	nx = gpsd.next()
+	# For a list of all supported classes and fields refer to:
+	# https://gpsd.gitlab.io/gpsd/gpsd_json.html
+	if nx['class'] == 'TPV':
+		latitude = getattr(nx,'lat', "Unknown")
+		longitude = getattr(nx,'lon', "Unknown")
+		try:
+			elevation = getattr(nx,'altHAE', "Unknown")
+			#https://gpsd.gitlab.io/gpsd/gpsd_json.html
+		except:
+			elevation = 0
+	return [latitude, longitude, elevation]
+	
 	
 callsign = input("Please enter the callsign to track.")
 while True==True:
-	
-	a = [41.3535187, -74.02831, 30] #station coordinates for west point, ny at 30m asl
+	try:
+		a = getPositionData(gpsd)
+	except:
+		a = [41.3535187, -74.02831, 30] #default station coordinates for west point, ny at 30m asl
 	# pull in Rpi coordinates here
 	# input('Please enter ground station coordinates in format [lat,lon,el]') #[lat, lon]
 	b = display_APRS(callsign) #parsed from APRS website, default elv = 0
@@ -234,7 +253,7 @@ while True==True:
 	print("Altitude is: ", altitude)
 	print("Azimuth is: ", new_azimuth)
 	print("Distace is: ", distKm)
-	#time.sleep(10) #can the api handle requests every 10 seconds?
+
 	#port this over to antenna rotator commands
 
 
