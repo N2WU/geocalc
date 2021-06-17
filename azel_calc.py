@@ -193,7 +193,7 @@ def Calculate(locations):
 		altitude = 90.0 - (180.0 / math.pi)*math.acos(bma[0]*ap[4] + bma[1]*ap[5] + bma[2]*ap[6]) #fix
 	return [altitude, azimuth, distKm]
 
-def FixAzimuth(old_azimuth):
+def Offset():
 	ax,ay,az,wx,wy,wz = mpu6050_conv() # read and convert mpu6050 data, you need wx, wy, wz. 
 	#Assumes no x- or y-axis rotation (gyro stays flat entire time and starts pointing magnetic north) IDENTIFY IF GRID OR MAGNETIC
 	#so really we need wz
@@ -209,12 +209,7 @@ def FixAzimuth(old_azimuth):
 		dt = stop - start
 		rotation = inst_w * dt #deviation is from north, counter-clockwise
 		aggregate = aggregate + rotation
-	azimuth = aggregate + old_azimuth
-	if (azimuth < 0.0):
-		azimuth = azimuth + 360.0
-	if (azimuth > 360.0):
-		azimuth = azimuth - 360.0
-	return azimuth
+	return aggregate
 	
 callsign = input("Please enter the callsign to track.")
 while True==True:
@@ -229,8 +224,12 @@ while True==True:
 	altitude = outputs[0]
 	
 	old_azimuth = ouputs[1]
-	new_azimuth = FixAzimuth(old_azimuth)
-	
+	adjustment = Offset()
+	azimuth = adjustment + old_azimuth
+	if (azimuth < 0.0):
+		azimuth = azimuth + 360.0
+	if (azimuth > 360.0):
+		azimuth = azimuth - 360.0
 	distKm = outputs[2]
 	print("Altitude is: ", altitude)
 	print("Azimuth is: ", new_azimuth)
