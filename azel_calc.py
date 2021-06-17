@@ -194,10 +194,10 @@ def Calculate(locations):
 	return [altitude, azimuth, distKm]
 
 def Offset():
-	ax,ay,az,wx,wy,wz = mpu6050_conv() # read and convert mpu6050 data, you need wx, wy, wz. 
+	#ax,ay,az,wx,wy,wz = mpu6050_conv() # read and convert mpu6050 data, you need wx, wy, wz. 
 	#Assumes no x- or y-axis rotation (gyro stays flat entire time and starts pointing magnetic north) IDENTIFY IF GRID OR MAGNETIC
 	#so really we need wz
-	angular_accel = wz #units is degrees per second, so how do we find total degree change? integrate / multiply by time
+	#angular_accel = wz #units is degrees per second, so how do we find total degree change? integrate / multiply by time
 	time_tot = 10 #number of seconds, total, that you should sample for
 	aggregate = 0
 	for i in range(1000)
