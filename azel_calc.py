@@ -34,9 +34,9 @@ def file_get_contents(url):
 		return ''
 
   
-def display_APRS():
+def display_APRS(callsign):
 	#json_url = "http://api.aprs.fi/api/get?apikey=159399.78M4gSLkxEmFnlwB&name=KBNA,KF4KFQ,AG4FW,WR1Q&what=wx&format=json"
-	json_url = "http://api.aprs.fi/api/get?apikey=159399.78M4gSLkxEmFnlwB&name=N2WU&what=loc&format=json"
+	json_url = "http://api.aprs.fi/api/get?apikey=159399.78M4gSLkxEmFnlwB&name=" + callsign + "&what=loc&format=json"
   #API key is relative to aprs.fi account, name is callsign, what is gps, format is json
 	json_item = file_get_contents(json_url)
 	json_output = json.loads(json_item)
@@ -194,13 +194,13 @@ def Calculate(locations):
 		altitude = 90.0 - (180.0 / math.pi)*math.acos(bma[0]*ap[4] + bma[1]*ap[5] + bma[2]*ap[6]) #fix
 	return [altitude, azimuth, distKm]
 
-
+callsign = input("Please enter the callsign to track.")
 while True==True:
 	
 	a = [41.3535187, -74.02831, 30] #station coordinates for west point, ny at 30m asl
 	# pull in Rpi coordinates here
 	# input('Please enter ground station coordinates in format [lat,lon,el]') #[lat, lon]
-	b = display_APRS() #parsed from APRS website, default elv = 0
+	b = display_APRS(callsign) #parsed from APRS website, default elv = 0
 	locations = [a[0], a[1],  a[2], b[1], b[2], b[3]]
 	outputs = Calculate(locations)
 	
