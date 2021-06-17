@@ -11,26 +11,27 @@
 #GPS PARSE
 import json
 import math
+import time
 
 # some packages were renamed in Python 3
 import urllib.request as urllib2
 import http.cookiejar as cookielib
 
 def file_get_contents(url):
-  url = str(url).replace(" ", "+") # just in case, no space in url
-  hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+	url = str(url).replace(" ", "+") # just in case, no space in url
+	hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
            'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
            'Accept-Encoding': 'none',
            'Accept-Language': 'en-US,en;q=0.8',
            'Connection': 'keep-alive'}
-  req = urllib2.Request(url, headers=hdr)
-  try:
-    page = urllib2.urlopen(req)
-    return page.read()
-  except urllib2.HTTPError as e:
-    print(e.fp.read())
-    return ''
+	req = urllib2.Request(url, headers=hdr)
+	try:
+		page = urllib2.urlopen(req)
+		return page.read()
+	except urllib2.HTTPError as e:
+		print(e.fp.read())
+		return ''
 
   
 def display_APRS():
@@ -56,9 +57,6 @@ def display_APRS():
 
 
 
-a = [41.3535187, -74.02831, 30] #station coordinates for west point, ny at 30m asl
-# input('Please enter ground station coordinates in format [lat,lon,el]') #[lat, lon]
-b = display_APRS() #parsed from APRS website, default elv = 0
 
 
 limit = 90
@@ -164,13 +162,15 @@ def NormalizeVectorDiff(bp, ap):
 	return [(dx/dist), (dy/dist), (dz/dist), 1.0] #[x y z radius]
 
 
+def Calculate(locations):
+	a = [locations[0], locations[1], locations[2]]
+	b = [locations[3], locations[4], locations[5]]
+	ap = LocationToPoint(a) #now it's [x, y, z, radius, nx, ny, nz]
+	bp = LocationToPoint(b)
+	concantentate = [ap[0], ap[1], ap[2], bp[0], bp[1], bp[2]]
 
-ap = LocationToPoint(a) #now it's [x, y, z, radius, nx, ny, nz]
-bp = LocationToPoint(b)
-concantentate = [ap[0], ap[1], ap[2], bp[0], bp[1], bp[2]]
-
-distanceM = Distance(concantentate)
-distKm = 0.001 * distanceM
+	distanceM = Distance(concantentate)
+	distKm = 0.001 * distanceM
 
 # Let's use a trick to calculate azimuth:
 # Rotate the globe so that point A looks like latitude 0, longitude 0.
@@ -178,26 +178,40 @@ distKm = 0.001 * distanceM
 # but use angles based on subtraction.
 # Point A will be at x=radius, y=0, z=0.
 # Vector difference B-A will have dz = N/S component, dy = E/W component.
-br = RotateGlobe(b, a, bp[3], ap[3]) #radius is 4th element, gives [bx by bz bradius]
-if (br[2]*br[2] + br[1]*br[1] > 1.0e-6): #fix
-	theta = math.atan2(br[2], br[1]) * 180.0 / math.pi
-	azimuth = 90.0 - theta
-	if (azimuth < 0.0):
-		azimuth = azimuth + 360.0
-	if (azimuth > 360.0):
-		azimuth = azimuth - 360.0
-	bma = NormalizeVectorDiff(bp, ap) #gives [x y z radius]
+	br = RotateGlobe(b, a, bp[3], ap[3]) #radius is 4th element, gives [bx by bz bradius]
+	if (br[2]*br[2] + br[1]*br[1] > 1.0e-6): #fix
+		theta = math.atan2(br[2], br[1]) * 180.0 / math.pi
+		azimuth = 90.0 - theta
+		if (azimuth < 0.0):
+			azimuth = azimuth + 360.0
+		if (azimuth > 360.0):
+			azimuth = azimuth - 360.0
+		bma = NormalizeVectorDiff(bp, ap) #gives [x y z radius]
             # Calculate altitude, which is the angle above the horizon of B as seen from A.
             # Almost always, B will actually be below the horizon, so the altitude will be negative.
             # The dot product of bma and norm = cos(zenith_angle), and zenith_angle = (90 deg) - altitude.
             # So altitude = 90 - acos(dotprod).
-	altitude = 90.0 - (180.0 / math.pi)*math.acos(bma[0]*ap[4] + bma[1]*ap[5] + bma[2]*ap[6]); #fix
+		altitude = 90.0 - (180.0 / math.pi)*math.acos(bma[0]*ap[4] + bma[1]*ap[5] + bma[2]*ap[6]) #fix
+	return [altitude, azimuth, distKm]
 
 
-print("Altitude is: ", altitude)
-print("Azimuth is: ", azimuth)
-print("Distace is: ", distKm)
-#port this over to antenna rotator commands
+while True==True:
+	
+	a = [41.3535187, -74.02831, 30] #station coordinates for west point, ny at 30m asl
+	# pull in Rpi coordinates here
+	# input('Please enter ground station coordinates in format [lat,lon,el]') #[lat, lon]
+	b = display_APRS() #parsed from APRS website, default elv = 0
+	locations = [a[0], a[1],  a[2], b[1], b[2], b[3]]
+	outputs = Calculate(locations)
+	
+	altitude = outputs[0]
+	azimuth = ouputs[1]
+	distKm = outputs[2]
+	print("Altitude is: ", altitude)
+	print("Azimuth is: ", azimuth)
+	print("Distace is: ", distKm)
+	time.sleep(10) #can the api handle requests every 10 seconds?
+	#port this over to antenna rotator commands
 
 
 
