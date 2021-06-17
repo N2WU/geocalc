@@ -56,7 +56,8 @@ def display_APRS():
 
 
 
-a = [41.3535187, -74.02831, 30]# input('Please enter ground station coordinates in format [lat,lon,el]') #[lat, lon]
+a = [41.3535187, -74.02831, 30] #station coordinates for west point, ny at 30m asl
+# input('Please enter ground station coordinates in format [lat,lon,el]') #[lat, lon]
 b = display_APRS() #parsed from APRS website, default elv = 0
 
 
@@ -196,6 +197,7 @@ if (br[2]*br[2] + br[1]*br[1] > 1.0e-6): #fix
 print("Altitude is: ", altitude)
 print("Azimuth is: ", azimuth)
 print("Distace is: ", distKm)
+#port this over to antenna rotator commands
 
 
 
