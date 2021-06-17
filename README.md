@@ -5,6 +5,7 @@ This script should run headless on a raspberry pi connected to antenna rotator, 
 
 **When starting the script, the gyroscope should be as flat and stationary as possible and orientated compass (magnetic) north. The gyroscope will only read angular velocities on the z axis (rotation)**
 
+The code requires you to put in your aprs.fi API key in the azel_calc.py script. My api key is there now. It asks for text input for callsign - you must change this if you want to run headless.
 
 Accomplishes the following:
 1. Takes input "station" GPS coordinates
